@@ -2,7 +2,7 @@
 
 Mindot is a simple and minimal dotfiles manager that copies the dotfiles in the current directory to share them.
 
-![mindot-help](./.media/mindot-help.png)
+![mindot-help](./media/mindot-help.png)
 
 Mindot works by saving the paths to the dotfiles in `~/.config/mindot/files.json` and uses `backup` (to copy them from the home to the directory you specify) or `restore` (to copy them from the current directory to the home).
 
