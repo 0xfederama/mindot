@@ -16,16 +16,25 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Add file or directory
-    Add { file_list: Vec<String> },
+    /// Add files or directories to the list
+    Add {
+        /// List of files to add
+        file_list: Vec<String>,
+    },
 
-    /// Delete file
-    Del { file_list: Vec<String> },
+    /// Delete files or directories from the list
+    Del {
+        /// List of files to delete
+        file_list: Vec<String>,
+    },
 
-    /// Backup the files, copying from the home directory to the one listed
-    Backup { path: String },
+    /// Backup the files, copying from the home directory to path
+    Backup {
+        /// Path in which to copy the files
+        path: String,
+    },
 
-    /// Restore the files to the home directory
+    /// Restore the files from cwd to the home directory
     Restore,
 
     /// List the files to back up
