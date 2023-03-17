@@ -12,6 +12,17 @@ My use case is:
 - use `mindot backup <path>` to copy them elsewhere and later push them to my github [repo](https://github.com/0xfederama/dotfiles)
 - then, when I need to use them on another machine, I simply clone my repo there and use `mindot restore` to copy them back.
 
+## Installation
+TBD
+
+## Build
+In order to build this project you have to have Rust istalled on your machine. After that, it's as simple as:
+```bash
+git clone https://github.com/0xfederama/mindot.git
+cd mindot
+cargo build
+```
+
 ## Disclaimer
 Yes, the files are duplicated, but that's good in some cases, for example when you want to modify them only for sharing.
 
