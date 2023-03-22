@@ -25,7 +25,9 @@ jobs:
           target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Build
-      run: cargo build --release --target ${{ matrix.target }}
+      run: |
+        rustup target add ${{ matrix.target }}
+        cargo build --release --target ${{ matrix.target }}
     - name: Package
       shell: bash
       run: |
