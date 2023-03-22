@@ -22,9 +22,7 @@ jobs:
         
       - name: Get version
         id: get_version
-        run: ｜
-          echo $GITHUB_REF_NAME
-          echo "VERSION=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
         
       - uses: actions/cache@v3
         with:
