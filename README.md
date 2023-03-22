@@ -13,7 +13,7 @@ My use case is:
 - then, when I need to use them on another machine, I simply clone my repo there and use `mindot restore` to copy them back.
 
 ## Installation
-TBD
+Download the latest binaries [here](https://github.com/0xfederama/mindot/releases).
 
 ## Build
 In order to build this project you have to have Rust istalled on your machine. After that, it's as simple as:
