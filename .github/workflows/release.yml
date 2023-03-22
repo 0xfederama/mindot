@@ -33,17 +33,15 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build windows target
-        shell: pwsh
         run: |
           rustup target add ${{ matrix.target }}
           cargo build --release --target ${{ matrix.target }}
           
       - name: Package
-        shell: bash
         run: |
           cd target/${{ matrix.target }}/release          
-          7z a mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.zip target/${{ matrix.target }}/release/mindot.exe
-          cd -
+          7z a ../../../mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.zip mindot.exe
+          cd ../../../
       - name: Publish
         uses: softprops/action-gh-release@v1
         # TODO: if any of the build step fails, the release should be deleted.
