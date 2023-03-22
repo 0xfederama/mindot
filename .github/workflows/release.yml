@@ -19,7 +19,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-
+      - name: Get tag
+        id: tag
+        uses: devops-actions/action-get-tag@v1.1
       - name: Build windows target
         run: |
           rustup target add ${{ matrix.target }}
@@ -36,7 +38,7 @@ jobs:
       - name: Package
         run: |
           cd target/${{ matrix.target }}/release          
-          7z a ../../../mindot_${{ github.ref }}_${{ matrix.target }}.zip mindot.exe
+          7z a ../../../mindot_${{steps.tag.outputs.tag}}_${{ matrix.target }}.zip mindot.exe
           cd ../../../
       - name: Publish
         uses: softprops/action-gh-release@v1
