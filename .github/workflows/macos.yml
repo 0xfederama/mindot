@@ -7,7 +7,7 @@ on:
 jobs:
   macos-release:
     name: deploy
-    if: startsWith(github.ref, 'refs/tags/')
+    #if: startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
         target: [aarch64-apple-darwin,x86_64-apple-darwin]
@@ -42,7 +42,7 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          #strip target/${{ matrix.target }}/release/mindot
+          strip target/${{ matrix.target }}/release/mindot
           cd target/${{ matrix.target }}/release          
           tar czvf ../../../mindot-${{ matrix.target }}.tar.gz mindot
           cd -
