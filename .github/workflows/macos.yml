@@ -18,10 +18,10 @@ jobs:
         target: aarch64-apple-darwin
         profile: minimal
     - name: Run cargo check
-      run: cargo build --release --target=aarch64-apple-darwin mindot
+      run: cargo build --release --target=aarch64-apple-darwin
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          mindot
+          target/aarch64-apple-darwin/release/mindot
