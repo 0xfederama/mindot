@@ -1,0 +1,137 @@
+
+name: Build binaries
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
+
+
+jobs:
+  win-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        target: [x86_64-pc-windows-msvc]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+        
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build windows target
+        run: |
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
+
+      - name: Package
+        run: |
+          cd target/${{ matrix.target }}/release          
+          7z a ../../../mindot_${{ github.ref_name }}_${{ matrix.target }}.zip mindot.exe
+          cd ../../../
+          
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        # TODO: if any of the build step fails, the release should be deleted.
+        with:
+          files: "mindot*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+  linux-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        target: [aarch64-unknown-linux-gnu,x86_64-unknown-linux-gnu]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: aarch64 dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: gcc-aarch64-linux-gnu
+          
+      - name: Build linux target
+        run: |
+          echo '[target.aarch64-unknown-linux-gnu]' >> ~/.cargo/config.toml
+          echo 'linker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
+          
+      - name: Package
+        shell: bash
+        run: |
+          cd target/${{ matrix.target }}/release          
+          tar czvf ../../../mindot_${{  github.ref_name  }}_${{ matrix.target }}.tar.gz mindot
+          cd -
+          
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        # TODO: if any of the build step fails, the release should be deleted.
+        with:
+          files: "mindot*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+  macos-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        target: [x86_64-apple-darwin,aarch64-apple-darwin]
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+          
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Build target
+        run: |
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
+
+      - name: Package
+        shell: bash
+        run: |
+          cd target/${{ matrix.target }}/release          
+          tar czvf ../../../mindot_${{  github.ref_name  }}_${{ matrix.target }}.tar.gz mindot
+          cd -
+          
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        # TODO: if any of the build step fails, the release should be deleted.
+        with:
+          files: "mindot*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
