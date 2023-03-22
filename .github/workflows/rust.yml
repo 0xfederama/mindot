@@ -1,0 +1,47 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: deploy
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        target: [aarch64-apple-darwin,x86_64-apple-darwin]
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - name: Build
+      run: cargo build --release --target ${{ matrix.target }}
+    - name: Package
+      shell: bash
+      run: |
+        #strip target/${{ matrix.target }}/release/mindot
+        cd target/${{ matrix.target }}/release          
+        tar czvf ../../../mindot-${{ matrix.target }}.tar.gz mindot
+        cd -
+    - name: Publish
+      uses: softprops/action-gh-release@v1
+      # TODO: if any of the build step fails, the release should be deleted.
+      with:
+        files: "mindot*"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
