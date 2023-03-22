@@ -10,15 +10,12 @@ on:
 
 
 jobs:
-  linux-win-release:
+  win-release:
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
-        win-target: [x86_64-pc-windows-msvc]
-        linux-target: [aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
-        macos-target: [x86_64-apple-darwin,aarch64-apple-darwin]
-        os: [ubuntu-latest,macos-latest,macos-latest]
-    runs-on: ${{ matrix.os }}
+        target: [x86_64-pc-windows-msvc]
+    runs-on: windows-latest
     steps:
       - name: Get version
         id: get_version
@@ -34,35 +31,86 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-          target: ${{ matrix.target }}
 
       - name: Build windows target
-        if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          rustup target add ${{ matrix.win-target }}
-          cargo build --release --target ${{ matrix.win-target }}
-          7z a mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.win-target }}.zip target/${{ matrix.target }}/release/mindot.exe
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
+          7z a mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.zip target/${{ matrix.target }}/release/mindot.exe
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        # TODO: if any of the build step fails, the release should be deleted.
+        with:
+          files: "mindot*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+  linux-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        target: [aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Checkout
+        uses: actions/checkout@v1
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build linux target
-        if: matrix.os == 'ubuntu-latest'
         run: |
-          rustup target add ${{ matrix.linux-target }}
-          cargo build --release --target ${{ matrix.linux-target }}
-          tar czvf mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.linux-target }}.tar.gz target/${{ matrix.target }}/release/mindot
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
+          tar czvf mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.tar.gz target/${{ matrix.target }}/release/mindot
+      
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        # TODO: if any of the build step fails, the release should be deleted.
+        with:
+          files: "mindot*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+  macos-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        target: [x86_64-apple-darwin,aarch64-apple-darwin]
+    runs-on: macos-latest
+    steps:
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Checkout
+        uses: actions/checkout@v1
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       
       - name: Build macos target
-        if: matrix.os == 'macos-latest'
         run: |
-          rustup target add ${{ matrix.macos-target }}
-          cargo build --release --target ${{ matrix.macos-target }}
-          tar czvf mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.macos-target }}.tar.gz target/${{ matrix.target }}/release/mindot
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
+          tar czvf mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.tar.gz target/${{ matrix.target }}/release/mindot
 
       - name: Publish
         uses: softprops/action-gh-release@v1
