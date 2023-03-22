@@ -37,8 +37,13 @@ jobs:
         run: |
           rustup target add ${{ matrix.target }}
           cargo build --release --target ${{ matrix.target }}
+          
+      - name: Package
+        shell: bash
+        run: |
+          cd target/${{ matrix.target }}/release          
           7z a mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.zip target/${{ matrix.target }}/release/mindot.exe
-
+          cd -
       - name: Publish
         uses: softprops/action-gh-release@v1
         # TODO: if any of the build step fails, the release should be deleted.
@@ -51,7 +56,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
-        target: [aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
+        target: [aarch64-unknown-linux-gnu,x86_64-unknown-linux-gnu]
     runs-on: ubuntu-latest
     steps:
       - name: Get version
@@ -73,9 +78,14 @@ jobs:
         run: |
           rustup target add ${{ matrix.target }}
           cargo build --release --target ${{ matrix.target }}
-          tar czvf mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.tar.gz target/${{ matrix.target }}/release/mindot
       
-
+      - name: Package
+        shell: bash
+        run: |
+          cd target/${{ matrix.target }}/release          
+          tar czvf ../../../mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.tar.gz mindot
+          cd -
+          
       - name: Publish
         uses: softprops/action-gh-release@v1
         # TODO: if any of the build step fails, the release should be deleted.
@@ -106,12 +116,18 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       
-      - name: Build macos target
+      - name: Build target
         run: |
           rustup target add ${{ matrix.target }}
           cargo build --release --target ${{ matrix.target }}
-          tar czvf mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.tar.gz target/${{ matrix.target }}/release/mindot
-
+          
+      - name: Package
+        shell: bash
+        run: |
+          cd target/${{ matrix.target }}/release          
+          tar czvf ../../../mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.tar.gz mindot
+          cd -
+          
       - name: Publish
         uses: softprops/action-gh-release@v1
         # TODO: if any of the build step fails, the release should be deleted.
