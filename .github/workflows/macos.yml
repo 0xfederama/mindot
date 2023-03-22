@@ -1,6 +1,10 @@
-name: Build and Publish Binary for aarch64 mac
+name: Build and Publish Binary for mac
 on:
-
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
   workflow_dispatch:
 
   
