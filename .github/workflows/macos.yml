@@ -1,5 +1,7 @@
 name: Build and Publish Binary for aarch64 mac
 on:
+  push:
+    - tags: v*
   workflow_dispatch:
   
 jobs:
