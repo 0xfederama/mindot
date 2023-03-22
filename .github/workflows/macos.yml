@@ -1,0 +1,23 @@
+name: Build and Publish Binary for aarch64 mac
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+    - name: Build
+      run: cargo build --release --target=aarch64-apple-darwin mindot
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          mindot
