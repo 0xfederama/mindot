@@ -1,8 +1,12 @@
 name: Build and Publish Binary for aarch64 mac
 on:
-  push:
-    - tags: v*
+
   workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Test scenario tags'
+        required: true
+        type: boolean
   
 jobs:
   build:
