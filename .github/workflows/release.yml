@@ -69,11 +69,20 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build linux target
+      - name: aarch64 dependencies
+        if: matrix.target == aarch64-unknown-linux-gnu
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: gcc-aarch64-linux-gnu
+          
+      - name: aarch64 cargo config
+        if: matrix.target == aarch64-unknown-linux-gnu
         run: |
           echo '[target.aarch64-unknown-linux-gnu]' >> ~/.cargo/config.toml
           echo 'linker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml
           
+      - name: Build linux target
+        run: |
           rustup target add ${{ matrix.target }}
           cargo build --release --target ${{ matrix.target }}
       
