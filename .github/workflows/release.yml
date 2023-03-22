@@ -18,14 +18,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
-      - name: Get tag
-        id: tag
-        uses: devops-actions/action-get-tag@v1.0.1
-      - name: Build windows target
-        run: |
-          rustup target add ${{ matrix.target }}
-          cargo build --release --target ${{ matrix.target }}
+        uses: actions/checkout@master
+        
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+        
       - uses: actions/cache@v3
         with:
           path: |
@@ -35,11 +33,18 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Build windows target
+        run: |
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
+
       - name: Package
         run: |
           cd target/${{ matrix.target }}/release          
-          7z a ../../../mindot_${{steps.tag.outputs.tag}}_${{ matrix.target }}.zip mindot.exe
+          7z a ../../../mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.zip mindot.exe
           cd ../../../
+          
       - name: Publish
         uses: softprops/action-gh-release@v1
         # TODO: if any of the build step fails, the release should be deleted.
@@ -57,22 +62,16 @@ jobs:
     steps:
       - name: Get version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+        
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@master
 
       - name: aarch64 dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           packages: gcc-aarch64-linux-gnu
           
-      - name: Build linux target
-        run: |
-          echo '[target.aarch64-unknown-linux-gnu]' >> ~/.cargo/config.toml
-          echo 'linker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml
-          rustup target add ${{ matrix.target }}
-          cargo build --release --target ${{ matrix.target }}
-
       - uses: actions/cache@v3
         with:
           path: |
@@ -82,6 +81,13 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Build linux target
+        run: |
+          echo '[target.aarch64-unknown-linux-gnu]' >> ~/.cargo/config.toml
+          echo 'linker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
           
       - name: Package
         shell: bash
@@ -107,14 +113,10 @@ jobs:
     steps:
       - name: Get version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+        
       - name: Checkout
         uses: actions/checkout@v1
-      
-      - name: Build target
-        run: |
-          rustup target add ${{ matrix.target }}
-          cargo build --release --target ${{ matrix.target }}
           
       - uses: actions/cache@v3
         with:
@@ -126,6 +128,11 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           
+      - name: Build target
+        run: |
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
+
       - name: Package
         shell: bash
         run: |
