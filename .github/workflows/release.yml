@@ -17,9 +17,6 @@ jobs:
         target: [x86_64-pc-windows-msvc]
     runs-on: windows-latest
     steps:
-      - name: Get version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Checkout
         uses: actions/checkout@v1
       - uses: actions/cache@v3
@@ -40,7 +37,7 @@ jobs:
       - name: Package
         run: |
           cd target/${{ matrix.target }}/release          
-          7z a ../../../mindot_${{ steps.get_version.outputs.VERSION }}_${{ matrix.target }}.zip mindot.exe
+          7z a ../../../mindot_${{ github.ref }}_${{ matrix.target }}.zip mindot.exe
           cd ../../../
       - name: Publish
         uses: softprops/action-gh-release@v1
@@ -74,6 +71,7 @@ jobs:
 
       - name: Build linux target
         run: |
+          echo '[target..aarch64-unknown-linux-gnu]\nlinker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml
           rustup target add ${{ matrix.target }}
           cargo build --release --target ${{ matrix.target }}
       
