@@ -2,7 +2,23 @@
 
 Mindot is a simple and minimal dotfiles manager that copies the dotfiles in the current directory to share them.
 
-![mindot-help](./media/mindot-help.png)
+```
+$ mindot --help
+
+Usage: mindot <COMMAND>
+
+Commands:
+  add      Add files or directories to the list
+  del      Delete files or directories from the list
+  backup   Backup the files, copying from the home directory to path
+  restore  Restore the files from cwd to the home directory
+  list     List the files to back up
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
 
 Mindot works by saving the paths to the dotfiles in `~/.config/mindot/files.json` and uses `backup` (to copy them from the home to the directory you specify) or `restore` (to copy them from the current directory to the home).
 
