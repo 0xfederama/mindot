@@ -22,6 +22,8 @@ Options:
 
 Mindot works by saving the paths to the dotfiles in `~/.config/mindot/files.json` and uses `backup` (to copy them from the home to the directory you specify) or `restore` (to copy them from the current directory to the home).
 
+Sometimes it has to be executed with `sudo`, I honestly don't know why.
+
 ## Example
 My use case is: 
 - add the dotfiles I want to backup using `mindot add file1 file2`
